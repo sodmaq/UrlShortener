@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+</head>
+<body>
+    <h1>URL Shortener</h1>
+
+    <!-- Shorten URL Form -->
+    <form id="shortenForm">
+        <label for="origUrl">Original URL:</label>
+        <input type="text" id="origUrl" required>
+        <button type="submit">Shorten</button>
+    </form>
+
+    <!-- Display All URLs -->
+    <div id="urlList"></div>
+
+    <script>
+        // Fetch data from backend and display saved URLs
+        async function fetchAndDisplayUrls() {
+            const response = await fetch('http://localhost:3000/all');
+            const data = await response.json();
+
+            const urlList = document.getElementById('urlList');
+            urlList.innerHTML = '<h2>Saved URLs:</h2>';
+
+            data.data.forEach(url => {
+                urlList.innerHTML += `<p>${url.origUrl} - Short URL: <a href="${url.shortUrl}" target="_blank">${url.shortUrl}</a></p>`;
+            });
+        }
+
+        // Shorten URL form submission
+        document.getElementById('shortenForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const origUrl = document.getElementById('origUrl').value;
+
+            const response = await fetch('http://localhost:3000/short', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ origUrl }),
+            });
+
+            const data = await response.json();
+
+            // Display the shortened URL
+            alert(`Shortened URL: ${data.data.shortUrl}`);
+
+            // Fetch and display all URLs after shortening
+            fetchAndDisplayUrls();
+        });
+
+        // Fetch and display URLs on page load
+        fetchAndDisplayUrls();
+    </script>
+</body>
+</html>

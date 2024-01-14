@@ -5,7 +5,6 @@ const mongoose = require("mongoose");
 const shortid = require("shortid");
 const Url = require("./Url");
 const utils = require("./utils/util");
-const path = require("path");
 
 // configure dotenv
 dotenv.config({ path: "./config.env" });
@@ -32,9 +31,8 @@ mongoose
   .then(() => console.log("DB connection successfully..."))
   .catch((err) => console.error("DB connection error:", err));
 
-app.get("/", async (req, res) => {
-  res.sendFile(path.join(__dirname, "/index.html"));
-});
+
+app
 // get all saved URLs
 app.get("/all", async (req, res) => {
   try {

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      label {
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      input {
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      button {
+        padding: 10px;
+        font-size: 16px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      #shortenedUrlContainer {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        display: none;
+        max-width: 600px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      #shortenedUrl {
+        font-size: 16px;
+        margin-bottom: 10px;
+        word-wrap: break-word;
+      }
+
+      #copyButton {
+        padding: 10px;
+        font-size: 16px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #copyButton:hover {
+        background-color: #2980b9;
+      }
+
+      #urlList {
+        margin-top: 20px;
+        max-width: 600px;
+        width: 100%;
+      }
+
+      p {
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>URL Shortener</h1>
+
+    <!-- Shorten URL Form -->
+    <form id="shortenForm">
+      <label for="origUrl">Original URL:</label>
+      <input type="text" id="origUrl" required />
+      <button type="submit">Shorten</button>
+    </form>
+
+    <!-- Display Shortened URL -->
+    <div id="shortenedUrlContainer">
+      <p id="shortenedUrl"></p>
+      <button id="copyButton">Copy</button>
+    </div>
+
+    <!-- Display All URLs -->
+    <div id="urlList"></div>
+
+    <script>
+      // Fetch data from backend and display saved URLs
+      async function fetchAndDisplayUrls() {
+        const response = await fetch("http://localhost:3000/all");
+        const data = await response.json();
+
+        const urlList = document.getElementById("urlList");
+        urlList.innerHTML = "<h2>Saved URLs:</h2>";
+
+        data.data.forEach((url) => {
+          urlList.innerHTML += `<p>${url.origUrl} - Short URL: <a href="${url.shortUrl}" target="_blank">${url.shortUrl}</a></p>`;
+        });
+      }
+
+      // Shorten URL form submission
+      document
+        .getElementById("shortenForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const origUrl = document.getElementById("origUrl").value;
+
+          const response = await fetch("http://localhost:3000/short", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ origUrl }),
+          });
+
+          const data = await response.json();
+
+          // Display the shortened URL in a box
+          const shortenedUrlContainer = document.getElementById(
+            "shortenedUrlContainer"
+          );
+          const shortenedUrl = document.getElementById("shortenedUrl");
+          const copyButton = document.getElementById("copyButton");
+
+          shortenedUrl.textContent = data.data.shortUrl;
+          shortenedUrlContainer.style.display = "block";
+
+          // Copy to clipboard functionality
+          copyButton.addEventListener("click", function () {
+            navigator.clipboard
+              .writeText(data.data.shortUrl)
+              .then(() => {
+                alert("Shortened URL copied to clipboard!");
+              })
+              .catch((err) => {
+                console.error("Unable to copy to clipboard", err);
+              });
+          });
+
+          // Fetch and display all URLs after shortening
+          fetchAndDisplayUrls();
+        });
+
+      // Fetch and display URLs on page load
+    </script>
+  </body>
+</html>
